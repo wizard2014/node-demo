@@ -37,9 +37,8 @@ exports.flashValidationErrors = (err, req, res, next) => {
   res.redirect('back');
 };
 
-
 /*
-  Development Error Hanlder
+  Development Error Handler
 
   In development we show good error messages so if we hit a syntax error or any other previously un-handled error, we can show good info on what happened
 */
@@ -59,7 +58,6 @@ exports.developmentErrors = (err, req, res, next) => {
     'application/json': () => res.json(errorDetails) // Ajax call, send JSON back
   });
 };
-
 
 /*
   Production Error Handler
