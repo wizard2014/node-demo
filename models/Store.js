@@ -31,12 +31,21 @@ const storeSchema = new mongoose.Schema({
       type: String,
       required: 'You must supply an address!'
     }
-  }
+  },
+  photo: String
 });
 
-storeSchema.pre('save', function (next) {
+storeSchema.pre('save', async function (next) {
   if (this.isModified('name')) {
     this.slug = slug(this.name);
+  }
+
+  // fine stores with the same slug
+  const slugRegEx = new RegExp(`^(${this.slug})((-[0-9]*$)?)$`, 'i');
+  const storesWithSlug = await this.constructor.find({ slug: slugRegEx });
+
+  if (storesWithSlug.length) {
+    this.slug = `${this.slug}-${storesWithSlug.length + 1}`;
   }
 
   next();
