@@ -81,9 +81,27 @@ exports.updateStore = async (req, res) => {
 };
 
 exports.getStores = async (req, res) => {
-  const stores = await Store.find();
+  const page = req.params.page || 1;
+  const limit = 5;
+  const skip = (page * limit) - limit;
 
-  res.render('stores', { title: 'Stores', stores });
+  const storesPromise = Store
+      .find()
+      .skip(skip)
+      .limit(limit)
+      .sort({ created: 'desc' });
+
+  const countPromise = Store.count();
+
+  const [stores, count] = await Promise.all([storesPromise, countPromise]);
+  const pages = Math.ceil(count / limit);
+
+  if (!stores.length && skip) {
+    req.flash('info', `Page ${page} doesn't exists.`);
+    return res.redirect(`/stores/page/${pages}`);
+  }
+
+  res.render('stores', { title: 'Stores', stores, page, pages, count });
 };
 
 const confirmOwner = (store, user) => {
@@ -184,4 +202,10 @@ exports.getHearts = async (req, res) => {
   });
 
   res.render('stores', { title: 'Hearted Stores', stores });
+};
+
+exports.getTopStores = async (req, res) => {
+  const stores = await Store.getTopStores();
+
+  res.render('topStores', { title: 'Top Stores', stores });
 };
